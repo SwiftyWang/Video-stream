@@ -18,13 +18,12 @@
 package com.hejunlin.liveplayback;
 
 import android.app.Activity;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.hejunlin.liveplayback.widget.MetroViewBorderImpl;
+
 /**
  * Created by hejunlin on 2016/10/28.
  * blog: http://blog.csdn.net/hejjunlin
@@ -44,17 +43,14 @@ public class MainActivity extends Activity {
 
     private void loadRecyclerViewMenuItem() {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.ry_menu_item);
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 1);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setFocusable(false);
-        mMetroViewBorderImpl.attachTo(recyclerView);
-        createOptionItemData(recyclerView, R.layout.detail_menu_item);
+        createOptionItemData(recyclerView);
     }
 
-    private void createOptionItemData(RecyclerView recyclerView, int id) {
-        OptionItemAdapter adapter = new OptionItemAdapter(this, id);
+    private void createOptionItemData(RecyclerView recyclerView) {
+        OptionItemAdapter adapter = new OptionItemAdapter(this);
         recyclerView.setAdapter(adapter);
-        recyclerView.scrollToPosition(0);
     }
 }

@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -34,6 +35,7 @@ import com.hejunlin.liveplayback.ijkplayer.media.IjkVideoView;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
@@ -42,37 +44,57 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
  * Created by hejunlin on 2016/10/28.
  * blog: http://blog.csdn.net/hejjunlin
  */
-public class LiveActivity extends Activity {
+public class LiveActivity extends Activity implements TitleEventCallBack {
 
+    private static final String TAG = LiveActivity.class.getSimpleName();
+    private static final long TITLE_DISMISS_DELAY = 5000;
+    private View mTVTitleView;
     private IjkVideoView mVideoView;
-    private RelativeLayout mVideoViewLayout;
     private RelativeLayout mLoadingLayout;
-    private TextView mLoadingText;
     private TextView mTextClock;
     private String mVideoUrl = "";
     private int mRetryTimes = 0;
     private static final int CONNECTION_TIMES = 5;
 
     @Override
+    public void OnTitleShow() {
+        mTVTitleView.setVisibility(View.VISIBLE);
+        mTextClock.setText(getDateFormat());
+        mTVTitleView.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mTVTitleView.setVisibility(View.GONE);
+            }
+        }, TITLE_DISMISS_DELAY);
+    }
+
+    @Override
+    public void OnTitleDismiss() {
+        Log.d(TAG, "OnTitleDismiss");
+        mTVTitleView.setVisibility(View.GONE);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_live);
         mVideoUrl = getIntent().getStringExtra("url");
+        String title = getIntent().getStringExtra("title");
         mVideoView = (IjkVideoView) findViewById(R.id.videoview);
-        mVideoViewLayout = (RelativeLayout) findViewById(R.id.fl_videoview);
         mLoadingLayout = (RelativeLayout) findViewById(R.id.rl_loading);
-        mLoadingText = (TextView) findViewById(R.id.tv_load_msg);
-        mTextClock = (TextView)findViewById(R.id.tv_time);
-        mTextClock.setText(getDateFormate());
-        mLoadingText.setText("节目加载中...");
+        mTextClock = (TextView) findViewById(R.id.tv_time);
+        mTVTitleView = findViewById(R.id.view_tv_title);
+        TextView tv_title = (TextView) findViewById(R.id.tv_title);
+        tv_title.setText(title);
+        OnTitleShow();
         initVideo();
     }
 
-    private String getDateFormate(){
+    private String getDateFormat() {
+        //get China Locale because all tv is from China
         Calendar c = Calendar.getInstance();
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String formattedDate = df.format(c.getTime());
-        return formattedDate;
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
+        return df.format(c.getTime());
     }
 
     public void initVideo() {
@@ -118,7 +140,7 @@ public class LiveActivity extends Activity {
             public boolean onError(IMediaPlayer mp, int what, int extra) {
                 if (mRetryTimes > CONNECTION_TIMES) {
                     new AlertDialog.Builder(LiveActivity.this)
-                            .setMessage("节目暂时不能播放")
+                            .setMessage(getString(R.string.stream_cannot_play))
                             .setPositiveButton(R.string.VideoView_error_button,
                                     new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int whichButton) {
@@ -136,6 +158,16 @@ public class LiveActivity extends Activity {
             }
         });
 
+        findViewById(R.id.fl_videoview).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mTVTitleView.getVisibility() != View.VISIBLE) {
+                    OnTitleShow();
+                } else {
+                    OnTitleDismiss();
+                }
+            }
+        });
     }
 
     @Override
@@ -159,9 +191,10 @@ public class LiveActivity extends Activity {
         IjkMediaPlayer.native_profileEnd();
     }
 
-    public static void activityStart(Context context, String url) {
+    public static void activityStart(Context context, String title, String url) {
         Intent intent = new Intent(context, LiveActivity.class);
         intent.putExtra("url", url);
+        intent.putExtra("title", title);
         context.startActivity(intent);
     }
 

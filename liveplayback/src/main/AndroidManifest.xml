@@ -21,7 +21,8 @@
         </activity>
         <activity
             android:name=".LiveActivity"
-            android:screenOrientation="portrait"/>
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:screenOrientation="sensorLandscape"/>
     </application>
 
 </manifest>

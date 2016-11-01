@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">LivePlayback</string>
+    <string name="stream_cannot_play">节目暂时不能播放</string>
+    <string name="stream_loading">节目加载中...</string>
 </resources>

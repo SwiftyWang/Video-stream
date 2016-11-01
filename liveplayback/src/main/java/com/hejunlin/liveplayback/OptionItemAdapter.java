@@ -31,13 +31,14 @@ import android.widget.TextView;
  */
 public class OptionItemAdapter extends RecyclerView.Adapter<OptionItemAdapter.ViewHolder> {
 
+    private static final String TAG = OptionItemAdapter.class.getSimpleName();
+    private Context mContext;
     // 数据集
-    private String[] mDataList = new String[] {
-            "CCTV1综合","CCTV2财经","CCTV3综艺","CCTV4中文国际","CCTV5体育","CCTV6电影","CCTV7军事农业","CCTV8电视剧", "CCTV9纪录",
-            "CCTV10科教","CCTV11戏曲","CCTV12社会与法","CCTV13新闻","CCTV14少儿","CCTV15音乐","第一剧场","湖南卫视"
+    private String[] mDataList = new String[]{
+            "CCTV1综合", "CCTV2财经", "CCTV3综艺", "CCTV4中文国际", "CCTV5体育", "CCTV6电影", "CCTV7军事农业", "CCTV8电视剧", "CCTV9纪录",
+            "CCTV10科教", "CCTV11戏曲", "CCTV12社会与法", "CCTV13新闻", "CCTV14少儿", "CCTV15音乐", "第一剧场", "湖南卫视", "动画王国高清"
     };
-
-    private String [] mUrlList = new String[]{
+    private String[] mUrlList = new String[]{
             "http://58.135.196.138:8090/live/db3bd108e3364bf3888ccaf8377af077/index.m3u8",
             "http://58.135.196.138:8090/live/e31fa63612644555a545781ea32e66d4/index.m3u8",
             "http://58.135.196.138:8090/live/A68CE6833D654a9e932A657689463088/index.m3u8",
@@ -54,76 +55,43 @@ public class OptionItemAdapter extends RecyclerView.Adapter<OptionItemAdapter.Vi
             "http://58.135.196.138:8090/live/4A5DF0BA0C994081B02F8215491C4E48/index.m3u8",
             "http://58.135.196.138:8090/live/ADBD55B50F2D47bb970DCCBAF458E6C8/index.m3u8",
             "http://58.135.196.138:8090/live/13BCA1A2EFDB4db3B5DF6A8D343C3E39/index.m3u8",
-            "http://117.144.248.49/HDhnws.m3u8?authCode=07110409322147352675&amp;stbId=006001FF0018120000060019F0D496A1&amp;Contentid=6837496099179515295&amp;mos=jbjhhzstsl&amp;livemode=1&amp;channel-id=wasusyt"
+            "http://117.144.248.49/HDhnws.m3u8?authCode=07110409322147352675&amp;stbId=006001FF0018120000060019F0D496A1&amp;Contentid=6837496099179515295&amp;mos=jbjhhzstsl&amp;livemode=1&amp;channel-id=wasusyt",
+            "http://183.207.249.7/PLTV/3/224/3221225555/index.m3u8",
     };
-
-    private Context mContext;
-    private int id;
-    private View.OnFocusChangeListener mOnFocusChangeListener;
-    private OnBindListener onBindListener;
-    private static final String TAG = OptionItemAdapter.class.getSimpleName();
-
-    public interface OnBindListener {
-        void onBind(View view, int i);
-    }
 
     public OptionItemAdapter(Context context) {
         super();
         mContext = context;
     }
 
-    public OptionItemAdapter(Context context, int id) {
-        super();
-        mContext = context;
-        this.id = id;
-    }
-
-    public OptionItemAdapter(Context context, int id, View.OnFocusChangeListener onFocusChangeListener) {
-        super();
-        mContext = context;
-        this.id = id;
-        this.mOnFocusChangeListener = onFocusChangeListener;
-    }
-
-    public void setOnBindListener(OnBindListener onBindListener) {
-        this.onBindListener = onBindListener;
+    @Override
+    public int getItemCount() {
+        return mDataList.length;
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        int resId = R.layout.detail_menu_item;
-        if (this.id > 0) {
-            resId = this.id;
-        }
-        View view = LayoutInflater.from(mContext).inflate(resId, viewGroup, false);
-        ViewHolder holder = new ViewHolder(view);
-
-        return holder;
-    }
-
-    @Override
-    public void onBindViewHolder(ViewHolder viewHolder, final int i) {
+    public void onBindViewHolder(ViewHolder viewHolder, int position) {
         if (mDataList.length == 0) {
             Log.d(TAG, "mDataset has no data!");
             return;
         }
-        viewHolder.mTextView.setText(mDataList[i]);
-        viewHolder.itemView.setTag(i);
-        viewHolder.itemView.setOnFocusChangeListener(mOnFocusChangeListener);
+        viewHolder.mTextView.setText(mDataList[position]);
+        viewHolder.itemView.setTag(position);
         viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                LiveActivity.activityStart(mContext, mUrlList[i]);
+                String url = mUrlList[(Integer) v.getTag()];
+                String title = mDataList[(Integer) v.getTag()];
+                Log.d(TAG, url);
+                LiveActivity.activityStart(mContext, title, url);
             }
         });
-        if (onBindListener != null) {
-            onBindListener.onBind(viewHolder.itemView, i);
-        }
     }
 
     @Override
-    public int getItemCount() {
-        return mDataList.length;
+    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        View view = LayoutInflater.from(mContext).inflate(R.layout.detail_menu_item, viewGroup, false);
+        return new ViewHolder(view);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
